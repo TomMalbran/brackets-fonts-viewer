@@ -35,7 +35,10 @@ define(function (require, exports, module) {
         LanguageManager    = brackets.getModule("language/LanguageManager"),
         ProjectManager     = brackets.getModule("project/ProjectManager"),
         FileSystem         = brackets.getModule("filesystem/FileSystem"),
-        FontHolderTemplate = require("text!htmlContent/font-holder.html");
+        FontHolderTemplate = require("text!htmlContent/font-holder.html"),
+        
+    /* List of Supported font Extensions */
+        FONT_EXTENSIONS = ["eot", "ttf", "otf", "cff", "afm", "lwfn", "ffil", "fon", "pfm", "pfb", "woff", "std", "pro", "xsf"];
     
     
     
@@ -93,13 +96,17 @@ define(function (require, exports, module) {
     }
     
     
+    /** Creates a new Font Language */
+    var binary = LanguageManager.getLanguage("binary");
+    binary.removeFileExtension(FONT_EXTENSIONS);
     
     LanguageManager.defineLanguage("font", {
-        name: "Font",
-        fileExtensions: ["eot", "ttf", "otf", "cff", "afm", "lwfn", "ffil", "fon", "pfm", "pfb", "woff", "std", "pro", "xsf"],
-        isBinary: true
+        name           : "Font",
+        fileExtensions : FONT_EXTENSIONS,
+        isBinary       : true
     });
     
+    /** Register the Custom Viewer */
     EditorManager.registerCustomViewer("font", {
         render   : render,
         onRemove : onRemove
