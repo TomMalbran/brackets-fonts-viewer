@@ -3,7 +3,7 @@
     "title": "Font Viewer",
     "description": "Open font files in Brackets and see an editable sample of the font.",
     "homepage": "https://github.com/TomMalbran/brackets-fonts-viewer",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "author": "Tomás Malbrán <malbrantomas@gmail.com> (https://github.com/TomMalbran/)",
     "license": "MIT",
     "engines": {

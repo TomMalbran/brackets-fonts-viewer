@@ -38,7 +38,7 @@ define(function (require, exports, module) {
         FontHolderTemplate = require("text!htmlContent/font-holder.html"),
         
     /* List of Supported font Extensions */
-        FONT_EXTENSIONS = ["eot", "ttf", "otf", "cff", "afm", "lwfn", "ffil", "fon", "pfm", "pfb", "woff", "std", "pro", "xsf"];
+        FONT_EXTENSIONS = ["ttf", "otf", "woff"];
     
     
     
