@@ -27,6 +27,8 @@
 define(function (require, exports, module) {
     "use strict";
 	
+    require("thirdparty/jquery.autogrow-textarea");
+    
     var AppInit            = brackets.getModule("utils/AppInit"),
         ExtensionUtils     = brackets.getModule("utils/ExtensionUtils"),
         StringUtils        = brackets.getModule("utils/StringUtils"),
@@ -46,14 +48,6 @@ define(function (require, exports, module) {
     
     
     
-    /** 
-     * Sign off listeners when editor manager closes the font viewer
-     */
-//    function onRemove() {
-//        $(DocumentManager).off("fileNameChange", onFileNameChange);
-//    }
-    
-    
     /**
      * FontView objects are constructed when an font is opened 
      * @constructor
@@ -71,23 +65,60 @@ define(function (require, exports, module) {
         
         $container.append(this.$el);
         
-        this.$fontFace = this.$el.find(".font-face");
-        this.$fontPath = this.$el.find(".font-path");
+        this.$fontFace    = this.$el.find(".font-face");
+        this.$fontPath    = this.$el.find(".font-path");
+        this.$fontData    = this.$el.find(".font-data");
+        this.$fontDisplay = this.$el.find(".font-display");
+        this.$fontEdit    = this.$el.find(".font-edit");
         
         // Update the file stats
-        var self = this;
-        this.file.stat(function (err, stat) {
-            if (!err && stat._size) {
-                var dataString = StringUtils.prettyPrintBytes(stat._size, 2);
-                self.$el.find(".font-holder .font-data").text(dataString).attr("title", dataString);
-            }
-        });
+        this._updateStats();
         
         // make sure we always show the right file name
         $(DocumentManager).on("fileNameChange", _.bind(this._onFilenameChange, this));
         
+        var self = this;
+        this.$el
+            .on("click.FontView", function (e) {
+                if (self.$fontEdit.is(":visible") && e.target !== self.$fontEdit.get(0)) {
+                    self._updateText();
+                }
+            })
+            .on("click.FontView", ".font-display", function (e) {
+                self.$fontDisplay.hide();
+                self.$fontEdit.show().autogrow().focus();
+                e.stopImmediatePropagation();
+            })
+            .on("change.FontView", ".font-edit", function () {
+                self._updateText();
+            });
+        
         _viewers[file.fullPath] = this;
     }
+    
+    /**
+     * Updates the text to show icons
+     */
+    FontView.prototype._updateText = function () {
+        var text     = this.$fontEdit.val(),
+            replaced = text.replace(/\\(\w{4})/g, "&#x$1;").replace(/U\+(\w{4})/g, "&#x$1;").replace(/\n/g, "<br />");
+        
+        this.$fontEdit.hide();
+        this.$fontDisplay.html(replaced).show();
+    };
+    
+    /**
+     * Updates the Font Stats
+     */
+    FontView.prototype._updateStats = function () {
+        var self = this;
+        this.file.stat(function (err, stat) {
+            if (!err && stat._size) {
+                var dataString = StringUtils.prettyPrintBytes(stat._size, 2);
+                self.$fontData.text(dataString).attr("title", dataString);
+            }
+        });
+    };
     
     /**
      * DocumentManger.fileNameChange handler - when a font is renamed, we must 
@@ -146,7 +177,7 @@ define(function (require, exports, module) {
     FontView.prototype.destroy = function () {
         delete _viewers[this.file.fullPath];
         $(DocumentManager).off("fileNameChange", _.bind(this._onFilenameChange, this));
-        this.$el.remove();
+        this.$el.off(".FontView").remove();
     };
     
     /* 
@@ -167,6 +198,7 @@ define(function (require, exports, module) {
 
         // Update the DOM node with the src URL 
         this.$fontFace.html("@font-face {font-family:'FontDisplay';src: url('" + noCacheUrl + "');}");
+        this._updateStats();
     };
     
     
